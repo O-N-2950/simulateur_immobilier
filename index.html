@@ -1,10 +1,1025 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Simulateur Immobilier</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur Immobilier Suisse</title>
+    
+    <!-- Styles pour Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Styles personnalisés -->
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        
+        #simulateur-immobilier-suisse {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            margin-top: 0;
+        }
+        
+        .section {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .grid-md-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            
+            .grid-md-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+        
+        .input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-sizing: border-box;
+        }
+        
+        .info-card {
+            background-color: #eff6ff;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+        
+        .info-card-green {
+            background-color: #ecfdf5;
+        }
+        
+        .info-card-yellow {
+            background-color: #fef3c7;
+        }
+        
+        .info-card-title {
+            font-weight: 500;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-card-title-green {
+            color: #065f46;
+        }
+        
+        .info-card-title-yellow {
+            color: #92400e;
+        }
+        
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .small-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+        
+        .warning-text {
+            margin-top: 0.75rem;
+            color: #dc2626;
+            font-size: 0.875rem;
+            background-color: #fee2e2;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+        
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: none;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .tranche-row {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 0.375rem;
+        }
+        
+        .col-span-3 {
+            grid-column: span 3 / span 3;
+        }
+        
+        .col-span-2 {
+            grid-column: span 2 / span 2;
+        }
+        
+        .add-button {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background-color: #d1fae5;
+            color: #047857;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .delete-button {
+            padding: 0.25rem;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            width: 100%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        
+        /* Correction pour Leaflet */
+        .leaflet-container {
+            z-index: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenue sur le simulateur immobilier</h1>
-    <iframe src="https://example.com" width="100%" height="500px"></iframe>
+    <div id="simulateur-immobilier-suisse"></div>
+    
+    <!-- Scripts externes -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+    
+    <!-- Code du simulateur -->
+    <script type="text/babel">
+        // Utilisez les versions globales des bibliothèques
+        const { useState, useEffect, useRef } = React;
+        const { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+        // Base de données des communes suisses incluant TOUTES les communes du Jura
+        const donneesImmobilieres = {
+            // Grandes villes suisses
+            "1000": {
+                commune: "Lausanne",
+                prixMoyen: { min: 8500, max: 10200 },
+                evolution: 2.3,
+                tauxVacance: 0.8
+            },
+            "1200": {
+                commune: "Genève",
+                prixMoyen: { min: 10500, max: 13800 },
+                evolution: 1.8,
+                tauxVacance: 0.5
+            },
+            "8000": {
+                commune: "Zürich",
+                prixMoyen: { min: 11000, max: 14500 },
+                evolution: 2.7,
+                tauxVacance: 0.3
+            },
+            "3000": {
+                commune: "Berne",
+                prixMoyen: { min: 7800, max: 9600 },
+                evolution: 1.5,
+                tauxVacance: 1.2
+            },
+            "4000": {
+                commune: "Bâle",
+                prixMoyen: { min: 8200, max: 10800 },
+                evolution: 2.0,
+                tauxVacance: 0.9
+            },
+            "6000": {
+                commune: "Lucerne",
+                prixMoyen: { min: 8000, max: 10000 },
+                evolution: 1.9,
+                tauxVacance: 1.0
+            },
+            
+            // District de Delémont
+            "2800": {
+                commune: "Delémont",
+                prixMoyen: { min: 3800, max: 4500 },
+                evolution: 1.4,
+                tauxVacance: 2.1
+            },
+            "2805": {
+                commune: "Soyhières",
+                prixMoyen: { min: 3200, max: 3800 },
+                evolution: 0.7,
+                tauxVacance: 2.6
+            },
+            "2806": {
+                commune: "Mettembert",
+                prixMoyen: { min: 3000, max: 3600 },
+                evolution: 0.5,
+                tauxVacance: 2.7
+            },
+            "2812": {
+                commune: "Movelier",
+                prixMoyen: { min: 3100, max: 3700 },
+                evolution: 0.6,
+                tauxVacance: 2.6
+            },
+            "2813": {
+                commune: "Ederswiler",
+                prixMoyen: { min: 2900, max: 3500 },
+                evolution: 0.4,
+                tauxVacance: 2.8
+            },
+            "2822": {
+                commune: "Courroux",
+                prixMoyen: { min: 3500, max: 4100 },
+                evolution: 1.0,
+                tauxVacance: 2.3
+            },
+            "2823": {
+                commune: "Courcelon",
+                prixMoyen: { min: 3300, max: 3900 },
+                evolution: 0.9,
+                tauxVacance: 2.4
+            },
+            "2824": {
+                commune: "Vicques",
+                prixMoyen: { min: 3400, max: 4000 },
+                evolution: 0.9,
+                tauxVacance: 2.3
+            },
+            "2825": {
+                commune: "Courchapoix",
+                prixMoyen: { min: 3100, max: 3700 },
+                evolution: 0.7,
+                tauxVacance: 2.5
+            },
+            "2826": {
+                commune: "Corban",
+                prixMoyen: { min: 3000, max: 3600 },
+                evolution: 0.6,
+                tauxVacance: 2.6
+            },
+            "2827": {
+                commune: "Mervelier",
+                prixMoyen: { min: 3000, max: 3600 },
+                evolution: 0.6,
+                tauxVacance: 2.6
+            },
+            // District de Porrentruy
+            "2900": {
+                commune: "Porrentruy",
+                prixMoyen: { min: 3500, max: 4200 },
+                evolution: 1.2,
+                tauxVacance: 2.4
+            },
+            "2902": {
+                commune: "Fontenais",
+                prixMoyen: { min: 3200, max: 3800 },
+                evolution: 0.7,
+                tauxVacance: 2.6
+            },
+            "2904": {
+                commune: "Bressaucourt",
+                prixMoyen: { min: 3100, max: 3700 },
+                evolution: 0.7,
+                tauxVacance: 2.6
+            },
+            // District des Franches-Montagnes
+            "2350": {
+                commune: "Saignelégier",
+                prixMoyen: { min: 3200, max: 3800 },
+                evolution: 0.9,
+                tauxVacance: 2.5
+            },
+            "2340": {
+                commune: "Le Noirmont",
+                prixMoyen: { min: 3300, max: 3900 },
+                evolution: 1.0,
+                tauxVacance: 2.3
+            },
+            "2345": {
+                commune: "Les Breuleux",
+                prixMoyen: { min: 3200, max: 3800 },
+                evolution: 0.9,
+                tauxVacance: 2.4
+            }
+        };
+
+        // Coordonnées des principales communes
+        const coordonnees = {
+            "1000": [46.5197, 6.6323], // Lausanne
+            "1200": [46.2044, 6.1432], // Genève
+            "8000": [47.3769, 8.5417], // Zürich
+            "3000": [46.9480, 7.4474], // Berne
+            "4000": [47.5596, 7.5886], // Bâle
+            "6000": [47.0502, 8.3093], // Lucerne
+            "2800": [47.3650, 7.3428], // Delémont
+            "2900": [47.4156, 7.0745], // Porrentruy
+            "2350": [47.2556, 7.0036]  // Saignelégier
+        };
+
+        // Composant Carte avec OpenStreetMap
+        function CarteRegion({ npa, commune }) {
+            const mapRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            
+            useEffect(() => {
+                if (npa && commune && mapRef.current && typeof L !== 'undefined') {
+                    // Si une carte existe déjà, la nettoyer
+                    if (mapInstanceRef.current) {
+                        mapInstanceRef.current.remove();
+                    }
+                    
+                    // Initialisation de la carte Leaflet
+                    const map = L.map(mapRef.current).setView([46.8182, 8.2275], 8); // Vue par défaut sur la Suisse
+                    
+                    // Ajouter la couche OpenStreetMap
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                    
+                    // Sauvegarder l'instance de la carte
+                    mapInstanceRef.current = map;
+                    
+                    if (coordonnees[npa]) {
+                        const [lat, lon] = coordonnees[npa];
+                        map.setView([lat, lon], 13);
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`${commune} (${npa})`).openPopup();
+                    }
+                }
+            }, [npa, commune]);
+            
+            return (
+                <div>
+                    <div ref={mapRef} className="map-container"></div>
+                    <p className="small-text">
+                        Carte de la commune de {commune || "..."}
+                    </p>
+                </div>
+            );
+        }
+
+        // Composant pour gérer une tranche d'hypothèque
+        function TrancheHypothecaire({ tranche, index, onChange, onDelete }) {
+            return (
+                <div className="tranche-row">
+                    <div className="col-span-3">
+                        <label className="label">Montant (CHF)</label>
+                        <input
+                            type="number"
+                            value={tranche.montant}
+                            onChange={(e) => onChange(index, 'montant', Number(e.target.value))}
+                            className="input"
+                            min="0"
+                            step="10000"
+                        />
+                    </div>
+                    
+                    <div className="col-span-2">
+                        <label className="label">Taux (%)</label>
+                        <input
+                            type="number"
+                            value={tranche.taux}
+                            onChange={(e) => onChange(index, 'taux', Number(e.target.value))}
+                            className="input"
+                            min="0.1"
+                            step="0.05"
+                            max="10"
+                        />
+                    </div>
+                    
+                    <div className="col-span-2">
+                        <label className="label">Durée (ans)</label>
+                        <input
+                            type="number"
+                            value={tranche.duree}
+                            onChange={(e) => onChange(index, 'duree', Number(e.target.value))}
+                            className="input"
+                            min="1"
+                            max="25"
+                        />
+                    </div>
+                    
+                    <div className="col-span-3">
+                        <label className="label">Type</label>
+                        <select
+                            value={tranche.type}
+                            onChange={(e) => onChange(index, 'type', e.target.value)}
+                            className="input"
+                        >
+                            <option value="fixe">Fixe</option>
+                            <option value="libor">SARON</option>
+                            <option value="variable">Variable</option>
+                        </select>
+                    </div>
+                    
+                    <div className="col-span-2" style={{display: "flex", alignItems: "flex-end"}}>
+                        <button 
+                            onClick={() => onDelete(index)}
+                            className="delete-button"
+                        >
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant de visualisation financière
+        function VisualisationsFinancieres({ 
+            prixAchat, 
+            fondsPropresCashMontant, 
+            fondsPropres2ePilierMontant, 
+            hypotheque, 
+            tranches, 
+            interetsAnnuels, 
+            amortissement, 
+            entretien 
+        }) {
+            // Palettes de couleurs pour les graphiques
+            const COLORS_FINANCEMENT = ['#0088FE', '#00C49F', '#FFBB28'];
+            const COLORS_CHARGES = ['#FF8042', '#8884d8', '#82ca9d'];
+            
+            // Données pour le graphique en camembert de la répartition du financement
+            const dataFinancement = [
+                { name: 'Fonds propres (cash)', value: fondsPropresCashMontant },
+                { name: 'Fonds propres (2e pilier)', value: fondsPropres2ePilierMontant },
+                { name: 'Hypothèque', value: hypotheque }
+            ];
+            
+            // Données pour le graphique en camembert des charges
+            const dataCharges = [
+                { name: 'Intérêts', value: interetsAnnuels },
+                { name: 'Amortissement', value: amortissement },
+                { name: 'Entretien', value: entretien }
+            ];
+            
+            // Simulation d'amortissement sur 25 ans
+            const dataAmortissement = Array.from({ length: 25 }, (_, i) => {
+                const annee = i + 1;
+                // Amortissement linéaire de 1% par an
+                const soldeHypotheque = Math.max(0, hypotheque - (hypotheque * 0.01 * annee));
+                return {
+                    annee,
+                    soldeHypotheque
+                };
+            });
+            
+            // Fonction pour formater les montants en CHF
+            const formatCHF = (montant) => {
+                return new Intl.NumberFormat('fr-CH', { 
+                    style: 'currency', 
+                    currency: 'CHF',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(montant);
+            };
+            
+            return (
+                <div className="grid grid-md-2">
+                    <div className="section">
+                        <h3 className="section-title">Répartition du financement</h3>
+                        <div style={{ height: "250px" }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={dataFinancement}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={true}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        nameKey="name"
+                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {dataFinancement.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS_FINANCEMENT[index % COLORS_FINANCEMENT.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => formatCHF(value)} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                    
+                    <div className="section">
+                        <h3 className="section-title">Répartition des charges annuelles</h3>
+                        <div style={{ height: "250px" }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={dataCharges}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={true}
+                                        outerRadius={80}
+                                        fill="#82ca9d"
+                                        dataKey="value"
+                                        nameKey="name"
+                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {dataCharges.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS_CHARGES[index % COLORS_CHARGES.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => formatCHF(value)} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                    
+                    <div className="section" style={{gridColumn: "span 2"}}>
+                        <h3 className="section-title">Évolution de l'hypothèque (amortissement linéaire 1%)</h3>
+                        <div style={{ height: "300px" }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={dataAmortissement} margin={{ top: 5, right: 30, left: 20, bottom: 35 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis 
+                                        dataKey="annee" 
+                                        label={{ value: 'Années', position: 'insideBottom', offset: -20 }} 
+                                    />
+                                    <YAxis 
+                                        label={{ value: 'Montant hypothécaire (CHF)', angle: -90, position: 'insideLeft', offset: 0 }}
+                                        tickFormatter={(value) => formatCHF(value).replace('CHF', '')} 
+                                    />
+                                    <Tooltip 
+                                        formatter={(value) => [formatCHF(value), 'Solde hypothécaire']}
+                                        labelFormatter={(value) => `Année ${value}`}
+                                    />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey="soldeHypotheque" 
+                                        stroke="#8884d8" 
+                                        strokeWidth={2} 
+                                        dot={{ r: 1 }}
+                                        activeDot={{ r: 5 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant principal
+        function SimulateurImmobilier() {
+            // États pour les paramètres de base
+            const [prixAchat, setPrixAchat] = useState(430000);
+            const [surface, setSurface] = useState(100);
+            
+            // États pour les fonds propres
+            const [fondsPropresCashPct, setFondsPropresCashPct] = useState(10);
+            const [fondsPropres2ePilierPct, setFondsPropres2ePilierPct] = useState(10);
+            
+            // États pour les tranches hypothécaires
+            const [tranches, setTranches] = useState([
+                { montant: 0, taux: 1.75, duree: 5, type: 'fixe' },
+                { montant: 0, taux: 1.50, duree: 10, type: 'fixe' }
+            ]);
+            
+            // États pour la localisation
+            const [npa, setNpa] = useState('');
+            const [commune, setCommune] = useState('');
+            const [donneesLocales, setDonneesLocales] = useState(null);
+            const [afficherCarte, setAfficherCarte] = useState(false);
+            
+            // États pour les visualisations
+            const [afficherVisualisations, setAfficherVisualisations] = useState(false);
+            
+            // Calculs financiers
+            const fondsPropresCashMontant = prixAchat * (fondsPropresCashPct / 100);
+            const fondsPropres2ePilierMontant = prixAchat * (fondsPropres2ePilierPct / 100);
+            const fondsPropresMontantTotal = fondsPropresCashMontant + fondsPropres2ePilierMontant;
+            const fondsPropresPct = fondsPropresCashPct + fondsPropres2ePilierPct;
+            const hypotheque = prixAchat - fondsPropresCashMontant;
+            
+            // Calcul des intérêts avec les tranches
+            const calculerInterets = () => {
+                let interetsTotal = 0;
+                let montantAffecte = 0;
+                let montantRestant = hypotheque;
+                
+                // Calculer en fonction des tranches définies
+                tranches.forEach((tranche) => {
+                    const montantTranche = tranche.montant || 0;
+                    const montantEffectif = montantTranche > 0 ? Math.min(montantTranche, montantRestant) : montantRestant;
+                    interetsTotal += montantEffectif * (tranche.taux / 100);
+                    montantAffecte += montantEffectif;
+                    montantRestant = Math.max(0, montantRestant - montantEffectif);
+                });
+                
+                return interetsTotal;
+            };
+            
+            const interetsAnnuels = calculerInterets();
+            const amortissement = hypotheque * 0.01;
+            const entretien = prixAchat * 0.01;
+            const chargesAnnuelles = interetsAnnuels + amortissement + entretien;
+            const chargesMensuelles = chargesAnnuelles / 12;
+            const revenuNecessaire = chargesAnnuelles * 3;
+            
+            // Formatage CHF
+            const formatCHF = (montant) => {
+                return new Intl.NumberFormat('fr-CH', { 
+                    style: 'currency', 
+                    currency: 'CHF',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(montant);
+            };
+            
+            // Effet pour mettre à jour les tranches hypothécaires quand le montant hypothécaire change
+            useEffect(() => {
+                if (tranches.length > 0 && tranches.every(t => t.montant === 0)) {
+                    // Si aucun montant n'est défini, répartir le montant hypothécaire sur les tranches existantes
+                    const montantParTranche = hypotheque / tranches.length;
+                    setTranches(tranches.map(tranche => ({
+                        ...tranche,
+                        montant: Math.round(montantParTranche / 10000) * 10000
+                    })));
+                }
+            }, [hypotheque]);
+            
+            // Fonction pour ajouter une nouvelle tranche
+            const ajouterTranche = () => {
+                setTranches([...tranches, { montant: 0, taux: 1.65, duree: 5, type: 'fixe' }]);
+            };
+            
+            // Fonction pour mettre à jour une tranche
+            const mettreAJourTranche = (index, champ, valeur) => {
+                const nouvellesTranches = [...tranches];
+                nouvellesTranches[index] = { ...nouvellesTranches[index], [champ]: valeur };
+                setTranches(nouvellesTranches);
+            };
+            
+            // Fonction pour supprimer une tranche
+            const supprimerTranche = (index) => {
+                if (tranches.length > 1) {
+                    setTranches(tranches.filter((_, i) => i !== index));
+                }
+            };
+            
+            // Fonction pour rechercher les données d'une commune par NPA
+            const rechercherNPA = () => {
+                if (npa && npa.length === 4) {
+                    const donnees = donneesImmobilieres[npa];
+                    if (donnees) {
+                        setCommune(donnees.commune);
+                        setCommune(donnees.commune);
+                        setDonneesLocales(donnees);
+                        setAfficherCarte(true);
+                    } else {
+                        setCommune('');
+                        setDonneesLocales(null);
+                        setAfficherCarte(false);
+                    }
+                }
+            };
+            
+            // Valider les fonds propres
+            const fondsPropresValides = fondsPropresPct >= 20;
+            
+            return (
+                <div>
+                    <div className="header">
+                        <h1>Simulateur Immobilier Suisse</h1>
+                        <p>Calculez votre projet immobilier avec toutes les spécificités du marché suisse</p>
+                    </div>
+
+                    {/* Section principale */}
+                    <div className="section">
+                        <h2 className="section-title">Informations principales</h2>
+                        
+                        <div className="grid grid-md-2">
+                            <div>
+                                <label className="label">Prix d'achat (CHF)</label>
+                                <input
+                                    type="number"
+                                    value={prixAchat}
+                                    onChange={(e) => setPrixAchat(Number(e.target.value))}
+                                    className="input"
+                                    min="100000"
+                                    step="10000"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="label">Surface (m²)</label>
+                                <input
+                                    type="number"
+                                    value={surface}
+                                    onChange={(e) => setSurface(Number(e.target.value))}
+                                    className="input"
+                                    min="20"
+                                    max="1000"
+                                />
+                                {surface > 0 && prixAchat > 0 && (
+                                    <p className="small-text">
+                                        Prix au m²: {formatCHF(prixAchat / surface)}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Section de financement */}
+                    <div className="section">
+                        <h2 className="section-title">Structure de financement</h2>
+                        
+                        <div className="info-card">
+                            <h3 className="info-card-title">Fonds propres ({fondsPropresPct}%)</h3>
+                            
+                            <div className="grid grid-md-2">
+                                <div>
+                                    <label className="label">Fonds propres en espèces (%)</label>
+                                    <input
+                                        type="number"
+                                        value={fondsPropresCashPct}
+                                        onChange={(e) => setFondsPropresCashPct(Number(e.target.value))}
+                                        className="input"
+                                        min="0"
+                                        max="100"
+                                    />
+                                    <p className="small-text">
+                                        Montant: {formatCHF(fondsPropresCashMontant)}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <label className="label">2ème pilier / Prévoyance (%)</label>
+                                    <input
+                                        type="number"
+                                        value={fondsPropres2ePilierPct}
+                                        onChange={(e) => setFondsPropres2ePilierPct(Number(e.target.value))}
+                                        className="input"
+                                        min="0"
+                                        max="100"
+                                    />
+                                    <p className="small-text">
+                                        Montant: {formatCHF(fondsPropres2ePilierMontant)}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {!fondsPropresValides && (
+                                <div className="warning-text">
+                                    ⚠️ Les fonds propres doivent représenter au minimum 20% du prix d'achat en Suisse.
+                                </div>
+                            )}
+                            
+                            <div className="small-text" style={{marginTop: "10px"}}>
+                                <p>En Suisse, l'utilisation du 2ème pilier pour l'achat immobilier:</p>
+                                <ul style={{paddingLeft: "20px", marginTop: "5px"}}>
+                                    <li>Ne réduit pas le montant de l'hypothèque, contrairement aux fonds propres en espèces</li>
+                                    <li>Doit être remboursé en cas de vente du bien</li>
+                                    <li>Diminue vos prestations de retraite futures</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div className="info-card info-card-green" style={{marginTop: "20px"}}>
+                            <h3 className="info-card-title info-card-title-green">Tranches hypothécaires (Total: {formatCHF(hypotheque)})</h3>
+                            
+                            {tranches.map((tranche, index) => (
+                                <TrancheHypothecaire
+                                    key={index}
+                                    tranche={tranche}
+                                    index={index}
+                                    onChange={mettreAJourTranche}
+                                    onDelete={supprimerTranche}
+                                />
+                            ))}
+                            
+                            <button 
+                                onClick={ajouterTranche}
+                                className="add-button"
+                            >
+                                + Ajouter une tranche
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Section de localisation */}
+                    <div className="section">
+                        <h2 className="section-title">Localisation du bien</h2>
+                        
+                        <div className="grid grid-md-3">
+                            <div>
+                                <label className="label">Code postal (NPA)</label>
+                                <input
+                                    type="text"
+                                    pattern="[0-9]*"
+                                    maxLength="4"
+                                    value={npa}
+                                    onChange={(e) => setNpa(e.target.value)}
+                                    onBlur={rechercherNPA}
+                                    className="input"
+                                    placeholder="1000"
+                                />
+                                <p className="small-text">
+                                    Essayez 1000, 1200, 2800, 2900, 2350...
+                                </p>
+                            </div>
+                            
+                            <div className="col-span-2">
+                                <label className="label">Commune</label>
+                                <input
+                                    type="text"
+                                    value={commune}
+                                    onChange={(e) => setCommune(e.target.value)}
+                                    className="input"
+                                    placeholder="Lausanne"
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+                        
+                        {afficherCarte && <CarteRegion npa={npa} commune={commune} />}
+                        
+                        {/* Informations sur le marché local */}
+                        {donneesLocales && (
+                            <div className="info-card" style={{marginTop: "20px"}}>
+                                <h3 className="info-card-title">Informations sur le marché local</h3>
+                                <p className="small-text">Ces informations sont données à titre indicatif.</p>
+                                <div className="grid grid-md-3" style={{marginTop: "10px"}}>
+                                    <div>
+                                        <p className="small-text">Prix moyen au m²</p>
+                                        <p style={{fontWeight: "600"}}>
+                                            {formatCHF(donneesLocales.prixMoyen.min)} - {formatCHF(donneesLocales.prixMoyen.max)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="small-text">Évolution des prix (1 an)</p>
+                                        <p style={{
+                                            fontWeight: "600", 
+                                            color: donneesLocales.evolution > 0 ? "#059669" : "#dc2626"
+                                        }}>
+                                            {donneesLocales.evolution > 0 ? '+' : ''}{donneesLocales.evolution}%
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="small-text">Taux de vacance</p>
+                                        <p style={{fontWeight: "600"}}>{donneesLocales.tauxVacance}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Section des résultats */}
+                    <div className="section">
+                        <h2 className="section-title">Résultats financiers</h2>
+                        
+                        <div className="grid grid-md-2">
+                            <div className="info-card">
+                                <h3 className="info-card-title">Financement</h3>
+                                <div className="flex-between">
+                                    <span>Fonds propres:</span>
+                                    <span style={{fontWeight: "600"}}>{formatCHF(fondsPropresMontantTotal)} ({fondsPropresPct}%)</span>
+                                </div>
+                                <div className="flex-between">
+                                    <span>Montant hypothécaire:</span>
+                                    <span style={{fontWeight: "600"}}>{formatCHF(hypotheque)} ({(100 - fondsPropresPct).toFixed(0)}%)</span>
+                                </div>
+                            </div>
+                            
+                            <div className="info-card info-card-green">
+                                <h3 className="info-card-title info-card-title-green">Charges</h3>
+                                <div className="flex-between">
+                                    <span>Charges mensuelles:</span>
+                                    <span style={{fontWeight: "700", fontSize: "1.125rem"}}>{formatCHF(chargesMensuelles)}</span>
+                                </div>
+                                <div className="flex-between">
+                                    <span>dont Intérêts:</span>
+                                    <span>{formatCHF(interetsAnnuels/12)}</span>
+                                </div>
+                                <div className="flex-between">
+                                    <span>dont Amortissement:</span>
+                                    <span>{formatCHF(amortissement/12)}</span>
+                                </div>
+                                <div className="flex-between">
+                                    <span>dont Entretien:</span>
+                                    <span>{formatCHF(entretien/12)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="info-card info-card-yellow" style={{marginTop: "20px"}}>
+                            <h3 className="info-card-title info-card-title-yellow">Capacité financière</h3>
+                            <div className="flex-between">
+                                <span>Revenu mensuel recommandé:</span>
+                                <span style={{fontWeight: "700", fontSize: "1.125rem"}}>{formatCHF(revenuNecessaire/12)}</span>
+                            </div>
+                            <div className="small-text">
+                                Basé sur la règle du tiers (les charges ne doivent pas dépasser 1/3 du revenu)
+                            </div>
+                        </div>
+                        
+                        <button 
+                            onClick={() => setAfficherVisualisations(!afficherVisualisations)}
+                            className="button"
+                        >
+                            {afficherVisualisations ? "Masquer les visualisations" : "Afficher les visualisations graphiques"}
+                        </button>
+                        
+                        {afficherVisualisations && (
+                            <VisualisationsFinancieres
+                                prixAchat={prixAchat}
+                                fondsPropresCashMontant={fondsPropresCashMontant}
+                                fondsPropres2ePilierMontant={fondsPropres2ePilierMontant}
+                                hypotheque={hypotheque}
+                                tranches={tranches}
+                                interetsAnnuels={interetsAnnuels}
+                                amortissement={amortissement}
+                                entretien={entretien}
+                            />
+                        )}
+                    </div>
+                    
+                    <div className="footer">
+                        <p>Droits d'auteur © WW_Finance_Group</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Rendu de l'application React dans le conteneur HTML
+        ReactDOM.render(
+            <SimulateurImmobilier />,
+            document.getElementById('simulateur-immobilier-suisse')
+        );
+    </script>
 </body>
 </html>
